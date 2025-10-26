@@ -1,5 +1,7 @@
 package com.nelioalves.workshopmongo.resources;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,21 @@ public class PostResource {
 	public ResponseEntity<Post> findById(@PathVariable String id) {
 		Post obj = postService.findById(id);
 		return ResponseEntity.ok().body(obj);
+	}
+	
+	@GetMapping(value = "/fullsearch")
+	public ResponseEntity<List<Post>> fullSearch(
+			@RequestParam(defaultValue = "") String text,
+			@RequestParam(defaultValue = "") String minDate,
+			@RequestParam(defaultValue = "") String maxDate) {
+		text = URL.decodeParam(text);
+		Instant min = URL.convertDate(minDate, Instant.ofEpochMilli(0L));
+		Instant max = URL.convertDate(maxDate, Instant.now());
+		
+		max = max.plus(1, ChronoUnit.DAYS);
+
+		List<Post> list = postService.fullSearch(text, min, max);
+	    return ResponseEntity.ok().body(list);
 	}
 	
 	@GetMapping(value = "/titlesearch")
